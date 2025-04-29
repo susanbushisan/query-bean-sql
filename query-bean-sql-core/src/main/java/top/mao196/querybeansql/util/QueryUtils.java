@@ -1,6 +1,5 @@
 package top.mao196.querybeansql.util;
 
-import java.util.Collection;
 
 public class QueryUtils {
 

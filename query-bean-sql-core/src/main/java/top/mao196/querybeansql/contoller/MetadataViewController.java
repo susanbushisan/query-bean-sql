@@ -3,7 +3,6 @@ package top.mao196.querybeansql.contoller;
 import cn.hutool.core.lang.Dict;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.GetMapping;

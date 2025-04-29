@@ -13,7 +13,6 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.lang.NonNull;
 import org.springframework.util.ClassUtils;
-import top.mao196.querybeansql.config.QueryBeanConfig;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;

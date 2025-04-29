@@ -1,6 +1,5 @@
 package top.mao196.querybeansql.core;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.*;
 
 import java.util.ArrayList;
