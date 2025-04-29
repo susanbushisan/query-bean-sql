@@ -58,7 +58,7 @@ public class ViewController {
         if (BooleanUtil.isTrue(requestDTO.getReturnCount())) {
             String countSqlTemplate = "SELECT count(*) FROM ({viewSql}) _tmp {where}";
             String formatCountSql = StrUtil.format(countSqlTemplate, buildSqlParam, false);
-            log.info("query view count sql: [{}], param: [{}]",formatCountSql, result.getParams());
+            log.debug("query view count sql: [{}], param: [{}]",formatCountSql, result.getParams());
             objectSearchResult.setCount(getCount(formatCountSql, result.getParams()));
         }
         return ResponseEntity.ok(objectSearchResult);
