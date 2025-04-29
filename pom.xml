@@ -20,5 +20,24 @@
     </modules>
     <properties>
         <java.version>17</java.version>
+        <!-- 定义版本属性 -->
+        <hutool.version>5.8.16</hutool.version>
+        <knife4j.version>4.4.0</knife4j.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Hutool 依赖 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-core</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <!-- Knife4j 依赖 -->
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
