@@ -26,7 +26,7 @@ public class RequestParse {
         RequestParseResult result = new RequestParseResult();
         // 处理colum,查询视图所有的字段
         // 如果没有注解执行字段就用字段名的驼峰转下划线
-        String columns = viewDescriptor.getFields().stream().map(ViewFiledDescriptor::getColumnName).collect(Collectors.joining(", "));
+        String columns = viewDescriptor.getFields().stream().map(x-> x.getColumnName() + " AS " + x.getRawName()).collect(Collectors.joining(", "));
         result.setColumn(columns);
         // 处理where中的条件
         SearchFilter filter = requestDTO.getFilter();
