@@ -45,7 +45,12 @@ public class RequestParse {
             StringBuilder sb = new StringBuilder();
             sb.append("ORDER BY ");
             for (SearchOrder.OrderBy orderBy : requestDTO.getSortOrder().getOrderByList()) {
-                sb.append(orderBy.getProperty()).append(" ").append(orderBy.getOrder().getType()).append(",");
+                // 验证排序字段是否属于视图，防止 SQL 注入
+                ViewFiledDescriptor fieldDescriptor = viewDescriptor.findFieldDescriptor(orderBy.getProperty());
+                if (fieldDescriptor == null) {
+                    throw new QueryBeanSqlException("Invalid sort property: " + orderBy.getProperty());
+                }
+                sb.append(fieldDescriptor.getColumnName()).append(" ").append(orderBy.getOrder().getType()).append(",");
             }
             result.setOrder(sb.toString());
         }

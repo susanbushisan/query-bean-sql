@@ -35,6 +35,10 @@ public class ViewController {
 
     @PostMapping("/{viewName}/search")
     public <T> ResponseEntity<SearchResult<T>> searchViewPost(@PathVariable("viewName") String viewName, @RequestBody SearchEntitiesRequestDTO requestDTO) {
+        // 验证视图名称格式，防止 SQL 注入和路径遍历
+        if (!viewName.matches("^[a-zA-Z0-9_]+$")) {
+            throw new QueryBeanSqlException("Invalid view name: " + viewName);
+        }
 
         ViewDescriptor viewDescriptor = exposedViewRegistry.findDescriptor(viewName);
 
