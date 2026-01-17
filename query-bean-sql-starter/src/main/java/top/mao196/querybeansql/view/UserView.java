@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.Date;
 
 @Data
-@ViewExposed(sql = "select id, name, age, birth, balance, create_time, create_by from user" ,name = "user", desc = "用户信息")
+@ViewExposed(sql = "select id, name, age, birth, balance, create_time, create_by from \"user\"" ,name = "user", desc = "用户信息")
 public class UserView {
     private Long id;
     private String name;
