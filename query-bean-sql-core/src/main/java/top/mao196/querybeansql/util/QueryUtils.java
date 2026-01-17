@@ -5,9 +5,6 @@ public class QueryUtils {
 
     public static final String ESCAPE_CHARACTER = "\\";
 
-
-    public static final String QUERY_PARAMETER_REGEXP = "(?:^|[^\\w]):(\\(\\?i\\))?([^\\d][\\w.$]*)";
-
     /**
      * Escapes a parameter value for a 'like' operation in JPQL query
      *

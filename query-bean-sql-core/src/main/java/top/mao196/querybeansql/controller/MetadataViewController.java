@@ -1,4 +1,4 @@
-package top.mao196.querybeansql.contoller;
+package top.mao196.querybeansql.controller;
 
 import cn.hutool.core.lang.Dict;
 import lombok.RequiredArgsConstructor;

@@ -33,6 +33,6 @@ public enum FilterOp {
                 return op;
             }
         }
-        throw new IllegalArgumentException("Invalid filter operator: " + stringOp);
+        throw new QueryBeanSqlException("Invalid filter operator: " + stringOp);
     }
 }
