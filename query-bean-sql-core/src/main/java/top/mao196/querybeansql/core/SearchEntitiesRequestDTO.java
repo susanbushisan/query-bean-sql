@@ -4,6 +4,7 @@ package top.mao196.querybeansql.core;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,6 +25,13 @@ public class SearchEntitiesRequestDTO {
      * 例如: {{userId}} 会从 parameters 中获取 userId 的值
      */
     private Map<String, Object> parameters;
+
+    /**
+     * 字段选择器
+     * 指定要返回的字段列表，缺省则返回所有字段
+     * 例如: ["id", "name", "createdAt"]
+     */
+    private List<String> fields;
 
 
     @JsonIgnore

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @ViewExposed(
         sql = """
         SELECT id, order_no, user_id, user_name, amount, status, created_at FROM \"order\"
-         WHERE 1=1 ${userId? AND user_id = ${userId}} AND created_at > '${now}'
+         WHERE 1=1 ${userId? AND user_id = ${userId}}
         """,
         name = "orderP",
         desc = "订单视图用于集成测试"

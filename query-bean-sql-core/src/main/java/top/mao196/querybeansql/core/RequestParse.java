@@ -32,9 +32,9 @@ public class RequestParse {
         // 先处理 SQL 模板中的占位符
         String processedSql = processSqlPlaceholder(viewDescriptor.getSql(), requestDTO);
 
-        // 处理colum,查询视图所有的字段
-        // 如果没有注解执行字段就用字段名的驼峰转下划线
-        String columns = viewDescriptor.getFields().stream().map(x-> x.getColumnName() + " AS " + x.getRawName()).collect(Collectors.joining(", "));
+        // 处理 column,根据 fields 参数构建列
+        // 如果没有指定 fields，则返回所有字段
+        String columns = buildColumns(viewDescriptor, requestDTO.getFields());
         result.setColumn(columns);
 
         // 设置处理后的 SQL
@@ -143,6 +143,32 @@ public class RequestParse {
         log.info("[PLACEHOLDER] Result SQL: {}", result);
         log.info("[PLACEHOLDER] Parameters: {}", context.getAll());
         return result;
+    }
+
+    /**
+     * 根据字段选择器构建 SQL 列
+     * @param viewDescriptor 视图描述符
+     * @param requestedFields 请求的字段列表，null 或空表示返回所有字段
+     * @return 列名字符串
+     */
+    private String buildColumns(ViewDescriptor viewDescriptor, List<String> requestedFields) {
+        // 如果没有指定字段，返回所有字段
+        if (CollUtil.isEmpty(requestedFields)) {
+            return viewDescriptor.getFields().stream()
+                    .map(x -> x.getColumnName() + " AS " + x.getRawName())
+                    .collect(Collectors.joining(", "));
+        }
+
+        // 根据请求的字段构建列
+        return requestedFields.stream()
+                .map(fieldName -> {
+                    ViewFiledDescriptor fieldDescriptor = viewDescriptor.findFieldDescriptor(fieldName);
+                    if (fieldDescriptor == null) {
+                        throw new QueryBeanSqlException("Invalid field: " + fieldName);
+                    }
+                    return fieldDescriptor.getColumnName() + " AS " + fieldDescriptor.getRawName();
+                })
+                .collect(Collectors.joining(", "));
     }
 
 }
