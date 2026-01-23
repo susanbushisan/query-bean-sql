@@ -51,18 +51,18 @@ public class ViewController {
                 "where", result.getWhere(),
                 "order", result.getOrder(),
                 "limit", result.getLimit(),
-                "viewSql", viewDescriptor.getSql());
+                "viewSql", result.getViewSql());
 
         String querySqlTemplate = "SELECT {column} FROM ({viewSql}) _tmp {where} {order} {limit}";
         String formatQuerySql = StrUtil.format(querySqlTemplate, buildSqlParam, false);
-        log.info("query view sql: [{}], param: [{}]",formatQuerySql, result.getParams());
+        log.info("query view sql: [{}], param: [{}]", formatQuerySql, result.getParams());
         List<T> dataList = loadDataList(formatQuerySql, viewDescriptor, result.getParams());
         SearchResult<T> objectSearchResult = new SearchResult<>();
         objectSearchResult.setDataList(dataList);
         if (BooleanUtil.isTrue(requestDTO.getReturnCount())) {
             String countSqlTemplate = "SELECT count(*) FROM ({viewSql}) _tmp {where}";
             String formatCountSql = StrUtil.format(countSqlTemplate, buildSqlParam, false);
-            log.debug("query view count sql: [{}], param: [{}]",formatCountSql, result.getParams());
+            log.debug("query view count sql: [{}], param: [{}]", formatCountSql, result.getParams());
             objectSearchResult.setCount(getCount(formatCountSql, result.getParams()));
         }
         return ResponseEntity.ok(objectSearchResult);

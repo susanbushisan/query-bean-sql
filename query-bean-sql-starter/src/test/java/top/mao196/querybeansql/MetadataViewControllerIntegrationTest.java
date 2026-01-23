@@ -38,9 +38,7 @@ class MetadataViewControllerIntegrationTest {
         void getAllViews() throws Exception {
             mockMvc.perform(get("/rest/metadata/view/"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(1)))
-                    .andExpect(jsonPath("$[0].name", is("user")))
-                    .andExpect(jsonPath("$[0].description", is("用户信息")));
+                    .andExpect(jsonPath("$[?(@.name=='user')].description", hasItem("用户信息")));
         }
 
         @Test

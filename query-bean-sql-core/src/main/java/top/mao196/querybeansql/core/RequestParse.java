@@ -5,8 +5,11 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import top.mao196.querybeansql.config.QueryBeanConfig;
+import top.mao196.querybeansql.placeholder.FunctionPlaceholderParser;
+import top.mao196.querybeansql.placeholder.PlaceholderContext;
 import top.mao196.querybeansql.util.QueryUtils;
 
 import java.util.*;
@@ -18,16 +21,25 @@ import java.util.stream.Collectors;
  **/
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class RequestParse {
 
     private final QueryBeanConfig queryBeanConfig;
 
     public RequestParseResult parse(SearchEntitiesRequestDTO requestDTO, @NonNull ViewDescriptor viewDescriptor) {
         RequestParseResult result = new RequestParseResult();
+
+        // 先处理 SQL 模板中的占位符
+        String processedSql = processSqlPlaceholder(viewDescriptor.getSql(), requestDTO);
+
         // 处理colum,查询视图所有的字段
         // 如果没有注解执行字段就用字段名的驼峰转下划线
         String columns = viewDescriptor.getFields().stream().map(x-> x.getColumnName() + " AS " + x.getRawName()).collect(Collectors.joining(", "));
         result.setColumn(columns);
+
+        // 设置处理后的 SQL
+        result.setViewSql(processedSql);
+
         // 处理where中的条件
         SearchFilter filter = requestDTO.getFilter();
         if (filter != null) {
@@ -42,17 +54,17 @@ public class RequestParse {
 
         // 处理order by
         if (CollUtil.isNotEmpty(requestDTO.getSortOrder().getOrderByList())) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("ORDER BY ");
-            for (SearchOrder.OrderBy orderBy : requestDTO.getSortOrder().getOrderByList()) {
-                // 验证排序字段是否属于视图，防止 SQL 注入
-                ViewFiledDescriptor fieldDescriptor = viewDescriptor.findFieldDescriptor(orderBy.getProperty());
-                if (fieldDescriptor == null) {
-                    throw new QueryBeanSqlException("Invalid sort property: " + orderBy.getProperty());
-                }
-                sb.append(fieldDescriptor.getColumnName()).append(" ").append(orderBy.getOrder().getType()).append(",");
-            }
-            result.setOrder(sb.toString());
+            String orderPart = requestDTO.getSortOrder().getOrderByList().stream()
+                    .map(orderBy -> {
+                        // 验证排序字段是否属于视图，防止 SQL 注入
+                        ViewFiledDescriptor fieldDescriptor = viewDescriptor.findFieldDescriptor(orderBy.getProperty());
+                        if (fieldDescriptor == null) {
+                            throw new QueryBeanSqlException("Invalid sort property: " + orderBy.getProperty());
+                        }
+                        return fieldDescriptor.getColumnName() + " " + orderBy.getOrder().getType();
+                    })
+                    .collect(Collectors.joining(", "));
+            result.setOrder("ORDER BY " + orderPart);
         }
 
         // 处理limit,如果limit没有只指定了offset将不会生效
@@ -111,6 +123,26 @@ public class RequestParse {
             case ENDS_WITH -> "%" + QueryUtils.escapeForLike((String) value);
             default -> value;
         };
+    }
+
+    /**
+     * 处理 SQL 模板中的占位符
+     * @param sql 原始 SQL 模板
+     * @param requestDTO 请求参数
+     * @return 处理后的 SQL
+     */
+    private String processSqlPlaceholder(String sql, SearchEntitiesRequestDTO requestDTO) {
+        if (sql == null || sql.isEmpty()) {
+            return sql;
+        }
+        log.info("[PLACEHOLDER] Processing SQL: {}", sql);
+        // 构建占位符上下文
+        PlaceholderContext context = PlaceholderContext.fromRequest(requestDTO);
+        // 解析占位符
+        String result = FunctionPlaceholderParser.parse(sql, context);
+        log.info("[PLACEHOLDER] Result SQL: {}", result);
+        log.info("[PLACEHOLDER] Parameters: {}", context.getAll());
+        return result;
     }
 
 }

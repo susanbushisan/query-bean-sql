@@ -13,6 +13,11 @@ public class RequestParseResult {
 
     private String column;
 
+    /**
+     * 处理后的视图 SQL（占位符已替换）
+     */
+    private String viewSql;
+
     private String where;
 
     private String order;
