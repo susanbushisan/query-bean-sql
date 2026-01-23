@@ -12,6 +12,7 @@ import top.mao196.querybeansql.placeholder.FunctionPlaceholderParser;
 import top.mao196.querybeansql.placeholder.PlaceholderContext;
 import top.mao196.querybeansql.util.QueryUtils;
 
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,6 +93,10 @@ public class RequestParse {
         } else {
             FilterOp operator = conditionObj.getOperator();
             ViewFiledDescriptor fieldDescriptor = viewDescriptor.findFieldDescriptor(conditionObj.getProperty());
+
+            // 验证运算符是否与字段类型兼容
+            validateOperatorForType(operator, fieldDescriptor);
+
             String columnName = fieldDescriptor.getColumnName();
             if (operator == FilterOp.IS_NULL || operator == FilterOp.NOT_EMPTY) {
                 return String.format("%s %s", columnName, operator.getSqlOp());
@@ -169,6 +174,114 @@ public class RequestParse {
                     return fieldDescriptor.getColumnName() + " AS " + fieldDescriptor.getRawName();
                 })
                 .collect(Collectors.joining(", "));
+    }
+
+    /**
+     * 验证运算符是否与字段类型兼容
+     * @param operator 运算符
+     * @param fieldDescriptor 字段描述符
+     * @throws QueryBeanSqlException 如果运算符不兼容
+     */
+    private void validateOperatorForType(FilterOp operator, ViewFiledDescriptor fieldDescriptor) {
+        Class<?> fieldType = fieldDescriptor.getClz();
+        Set<FilterOp> allowedOps = getAllowedOperatorsForType(fieldType);
+
+        if (!allowedOps.contains(operator)) {
+            throw new QueryBeanSqlException(
+                    String.format("Operator '%s' is not supported for field type '%s'. Allowed operators: %s",
+                            operator.getStringOp(),
+                            fieldType.getSimpleName(),
+                            allowedOps.stream().map(FilterOp::getStringOp).collect(Collectors.joining(", "))));
+        }
+    }
+
+    /**
+     * 根据字段类型获取允许的运算符集合
+     * @param fieldType 字段的 Java 类型
+     * @return 允许的运算符集合
+     */
+    private Set<FilterOp> getAllowedOperatorsForType(Class<?> fieldType) {
+        Set<FilterOp> operators = new HashSet<>();
+
+        // 所有类型都支持的运算符
+        operators.add(FilterOp.IS_NULL);
+        operators.add(FilterOp.NOT_EMPTY);
+
+        if (isStringType(fieldType)) {
+            // 字符串类型支持的操作符
+            operators.add(FilterOp.EQUAL);
+            operators.add(FilterOp.NOT_EQUAL);
+            operators.add(FilterOp.CONTAINS);
+            operators.add(FilterOp.DOES_NOT_CONTAIN);
+            operators.add(FilterOp.STARTS_WITH);
+            operators.add(FilterOp.ENDS_WITH);
+            operators.add(FilterOp.IN);
+            operators.add(FilterOp.NOT_IN);
+        } else if (isNumericType(fieldType)) {
+            // 数值类型支持的操作符
+            operators.add(FilterOp.EQUAL);
+            operators.add(FilterOp.NOT_EQUAL);
+            operators.add(FilterOp.GREATER);
+            operators.add(FilterOp.GREATER_OR_EQUAL);
+            operators.add(FilterOp.LESSER);
+            operators.add(FilterOp.LESSER_OR_EQUAL);
+            operators.add(FilterOp.IN);
+            operators.add(FilterOp.NOT_IN);
+        } else if (isBooleanType(fieldType)) {
+            // 布尔类型支持的操作符
+            operators.add(FilterOp.EQUAL);
+            operators.add(FilterOp.NOT_EQUAL);
+        } else if (isDateTimeType(fieldType)) {
+            // 日期时间类型支持的操作符
+            operators.add(FilterOp.EQUAL);
+            operators.add(FilterOp.NOT_EQUAL);
+            operators.add(FilterOp.GREATER);
+            operators.add(FilterOp.GREATER_OR_EQUAL);
+            operators.add(FilterOp.LESSER);
+            operators.add(FilterOp.LESSER_OR_EQUAL);
+        }
+
+        return operators;
+    }
+
+    /**
+     * 判断是否为字符串类型
+     */
+    private boolean isStringType(Class<?> type) {
+        return CharSequence.class.isAssignableFrom(type) || type == String.class;
+    }
+
+    /**
+     * 判断是否为数值类型
+     */
+    private boolean isNumericType(Class<?> type) {
+        return Number.class.isAssignableFrom(type)
+                || type == int.class || type == Integer.class
+                || type == long.class || type == Long.class
+                || type == double.class || type == Double.class
+                || type == float.class || type == Float.class
+                || type == short.class || type == Short.class
+                || type == byte.class || type == Byte.class;
+    }
+
+    /**
+     * 判断是否为布尔类型
+     */
+    private boolean isBooleanType(Class<?> type) {
+        return type == boolean.class || type == Boolean.class;
+    }
+
+    /**
+     * 判断是否为日期时间类型
+     */
+    private boolean isDateTimeType(Class<?> type) {
+        return Temporal.class.isAssignableFrom(type)
+                || type == java.time.LocalDate.class
+                || type == java.time.LocalDateTime.class
+                || type == java.time.LocalTime.class
+                || type == java.util.Date.class
+                || type == java.sql.Timestamp.class
+                || type == java.sql.Date.class;
     }
 
 }
