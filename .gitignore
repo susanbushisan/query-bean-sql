@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /.claude/settings.local.json
+.gradle/
