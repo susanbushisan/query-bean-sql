@@ -10,14 +10,13 @@ Query Bean SQL 是一个 Spring Boot 3.4.4 库，通过注解驱动的配置简�
 
 ```bash
 # 构建所有模块
-./mvnw clean install
+./gradlew clean build
 
 # 运行测试
-./mvnw test
-
+./gradlew test
 
 # 构建时跳过测试
-./mvnw clean install -DskipTests
+./gradlew clean build -x test
 ```
 
 ## 架构
@@ -25,7 +24,7 @@ Query Bean SQL 是一个 Spring Boot 3.4.4 库，通过注解驱动的配置简�
 ### 模块结构
 
 - **query-bean-sql-core**：核心库模块，包含注解处理、视图注册、请求解析和 REST 控制器
-- **query-bean-sql-starter**：Spring Boot 应用启动器，包含 MySQL 驱动、Knife4j OpenAPI 文档和示例视图
+- **query-bean-sql-starter**：Spring Boot 应用启动器，包含 H2 数据库、Knife4j OpenAPI 文档和示例视图
 
 ### 核心流程
 
