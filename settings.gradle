@@ -1,0 +1,4 @@
+rootProject.name = 'query-bean-sql'
+
+include 'query-bean-sql-core'
+include 'query-bean-sql-starter'

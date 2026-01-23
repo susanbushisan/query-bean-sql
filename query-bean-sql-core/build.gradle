@@ -1,0 +1,28 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot' version '3.4.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+dependencies {
+    // 核心依赖
+    implementation 'cn.hutool:hutool-core:5.8.16'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    // Lombok
+    implementation 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // 测试
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'com.h2database:h2'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    archiveBaseName = 'query-bean-sql-core'
+}
